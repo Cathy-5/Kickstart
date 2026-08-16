@@ -1,6 +1,6 @@
 export default function TaskCard({ task }) {
   return (
-    <li key={task.id}>
+    <li className="task-card">
       <strong>{task.title}</strong>
       <p>{task.firstStep}</p>
     </li>
