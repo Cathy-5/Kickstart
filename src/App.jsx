@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import TaskCard from "./components/TaskCard";
 import TaskForm from "./components/TaskForm";
+import Timer from "./components/Timer";
 import { loadTasks, saveTasks } from "./utils/taskStorage.js";
 import "./App.css";
 
 export default function App() {
   const [tasks, setTasks] = useState(loadTasks);
   const [activeTask, setActiveTask] = useState(null)
+
 
   useEffect(() => {
     saveTasks(tasks);
@@ -31,14 +33,15 @@ export default function App() {
 
       <ul className="task-list">
         {tasks.map((task) => (
-          <>
             <TaskCard key={task.id} task={task} onStart={handleStartTask} />
-          </>
         ))}
       </ul>
 
       {activeTask && (
-        <p>Active task: {activeTask.title}</p>
+        <>
+          <p>Active task: {activeTask.title}</p> 
+          <Timer/>
+        </>
       )}
 
       <TaskForm onAddTask={handleAddTask} />
