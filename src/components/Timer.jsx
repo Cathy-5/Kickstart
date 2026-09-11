@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 
 
-export default function Timer() {
+export default function Timer({ onFinish }) {
     const [isRunning, setIsRunning] = useState(false);
     const [elapsedTime, setElapsedTime] = useState(0);
     const elapsedTimeRef = useRef(elapsedTime);
@@ -36,6 +36,15 @@ export default function Timer() {
 
     }
 
+    function handleFinish() {
+        if (elapsedTime === 0) return;
+
+        onFinish(elapsedTime);
+        setElapsedTime(0);
+        elapsedTimeRef.current = 0;
+        setIsRunning(false);
+    }
+
     return (
         <section>
             <div>{formatTime()}</div>
@@ -45,7 +54,7 @@ export default function Timer() {
                 elapsedTimeRef.current = 0;
                 setIsRunning(false);
             }}>Reset</button>
+            <button onClick={handleFinish}>Finish session</button>
         </section>
     );
 }
-
