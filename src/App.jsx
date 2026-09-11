@@ -77,8 +77,16 @@ export default function App() {
               )
             );
 
+            setTasks((currentTasks) =>
+              currentTasks.map((task) =>
+                task.id === finishedSession.taskId
+                  ? { ...task, completed: true }
+                  : task
+              )
+            );
+
             setFinishedSession(null);
-          }}       
+          }}
         />
       )}
 
@@ -90,13 +98,9 @@ export default function App() {
               <li key={session.id}>
                 {session.taskTitle} - {Math.round(session.elapsedTime / 1000)} seconds
 
-                {session.reflection && (
-                <p>Reflection: {session.reflection}</p>
-
-                )}
+                {session.reflection && <p>Reflection: {session.reflection}</p>}
               </li>
             ))}
-            
           </ul>
         </section>
       )}
