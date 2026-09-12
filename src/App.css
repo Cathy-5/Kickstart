@@ -363,11 +363,17 @@ button:focus-visible, [tabindex]:focus-visible {
 .reflection-form button { justify-self: start; padding: 12px 16px; border: 1px solid #637347; }
 .reflection-form button:hover { background: #b7c28c; }
 .history-panel { padding: 28px 4px; }
-.history-panel h2 { font: 1.6rem var(--hand); margin: 0 0 19px; }
+.history-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 19px; }
+.history-panel h2 { font: 1.6rem var(--hand); margin: 0; }
+.clear-history { padding: 3px 0; color: #77725f; font: .72rem var(--mono); text-decoration: underline; text-underline-offset: 3px; }
+.clear-history:hover { color: #9b4d36; transform: none; box-shadow: none; }
 .history-panel ul { list-style: none; margin: 0; padding: 0; }
-.history-panel li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 7px 10px; padding: 17px 0; border-bottom: 1px dashed #938c7266; }
+.history-panel li { padding: 17px 0; border-bottom: 1px dashed #938c7266; }
+.session-line { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 7px 10px; }
 .history-panel strong { font: 1.17rem/1.2 var(--hand); overflow-wrap: anywhere; }
 .session-duration { color: #747360; font-size: .75rem; align-self: center; white-space: nowrap; }
+.delete-session { width: 24px; height: 24px; padding: 0; border: 1px solid transparent; border-radius: 50%; color: #8b806d; font-size: 1.15rem; line-height: 1; opacity: .35; }
+.delete-session:hover, .delete-session:focus-visible { border-color: #9b4d36; color: #9b4d36; background: #f2d5b9; transform: none; box-shadow: none; opacity: 1; }
 .history-panel li p { grid-column: 1/-1; margin: 0; font-size: .8rem; line-height: 1.6; color: #73745f; overflow-wrap: anywhere; }
 .page-nav { display: flex; align-items: center; justify-content: end; gap: 12px; margin-top: 15px; flex-shrink: 0; font-size: .8rem; }
 .page-nav button { min-width: 34px; min-height: 34px; font-size: 1.25rem; }

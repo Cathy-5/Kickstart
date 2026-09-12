@@ -111,6 +111,20 @@ export default function App() {
     setFinishedSession(null);
   }
 
+  function handleDeleteSession(sessionId) {
+    if (!window.confirm("Delete this session from history?")) return;
+
+    setSessions((currentSessions) => currentSessions.filter((session) => session.id !== sessionId));
+    setHistoryPage((page) => Math.min(page, Math.max(0, Math.ceil((sessions.length - 1) / 5) - 1)));
+  }
+
+  function handleClearHistory() {
+    if (!window.confirm("Clear all session history? Your tasks will stay saved.")) return;
+
+    setSessions([]);
+    setHistoryPage(0);
+  }
+
   return (
     <main className={`app ${showHome && sessions.length ? "with-history" : ""}`}>
       <header className="app-header"><h1>Kickstart<span aria-hidden="true">.</span></h1></header>
@@ -200,11 +214,17 @@ export default function App() {
 
       {showHome && sessions.length > 0 && (
         <aside className="history-panel">
-          <h2>Session history</h2>
+          <div className="history-heading">
+            <h2>Session history</h2>
+            <button className="clear-history" onClick={handleClearHistory}>Clear all</button>
+          </div>
           <ul>{visibleSessions.map((session) => (
             <li key={session.id}>
-              <strong>{session.taskTitle}</strong>
-              <span className="session-duration">{Math.round(session.elapsedTime / 1000)} sec</span>
+              <div className="session-line">
+                <strong>{session.taskTitle}</strong>
+                <span className="session-duration">{Math.round(session.elapsedTime / 1000)} sec</span>
+                <button className="delete-session" aria-label={`Delete session for ${session.taskTitle}`} onClick={() => handleDeleteSession(session.id)}>&times;</button>
+              </div>
               {session.reflection && <p>{session.reflection}</p>}
             </li>
           ))}</ul>
