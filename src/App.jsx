@@ -125,6 +125,17 @@ export default function App() {
     setHistoryPage(0);
   }
 
+  function handleDeleteTask(taskId) {
+    const task = tasks.find((currentTask) => currentTask.id === taskId);
+    if (!task || !window.confirm(`Delete "${task.title}" permanently?`)) return;
+
+    setTasks((currentTasks) => currentTasks.filter((currentTask) => currentTask.id !== taskId));
+    if (String(taskId) === lastTaskId) {
+      setLastTaskId(null);
+      localStorage.removeItem("kickstart-last-task");
+    }
+  }
+
   return (
     <main className={`app ${showHome && sessions.length ? "with-history" : ""}`}>
       <header className="app-header"><h1>Kickstart<span aria-hidden="true">.</span></h1></header>
@@ -148,10 +159,14 @@ export default function App() {
           <div className="cartridge-shelf">
             <div className="hidden-tags">
               {hiddenTasks.map((task) => (
-                <button className="hidden-tag" key={task.id} data-tooltip={`Restore ${task.title}`}
-                  aria-label={`Restore ${task.title}`} onClick={() => toggleTaskVisibility(task.id)}>
-                  <span aria-hidden="true">+</span> {task.title}
-                </button>
+                <div className="hidden-task" key={task.id}>
+                  <button className="hidden-tag" data-tooltip={`Restore ${task.title}`}
+                    aria-label={`Restore ${task.title}`} onClick={() => toggleTaskVisibility(task.id)}>
+                    <span aria-hidden="true">+</span> {task.title}
+                  </button>
+                  <button className="hidden-task-delete" aria-label={`Delete ${task.title} permanently`}
+                    onClick={() => handleDeleteTask(task.id)}>&times;</button>
+                </div>
               ))}
             </div>
             {taskPageCount > 1 && (

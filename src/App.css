@@ -233,8 +233,11 @@ button:focus-visible, [tabindex]:focus-visible {
 }
 .cartridge-shelf { display: flex; gap: 14px; align-items: end; justify-content: space-between; padding: 0 24px 19px; }
 .hidden-tags { display: flex; flex-wrap: wrap; gap: 10px; }
+.hidden-task { display: flex; align-items: center; gap: 3px; }
 .hidden-tag { position: relative; padding: 7px 10px; border: 1px dashed #85826e; border-radius: 3px; max-width: 160px; overflow-wrap: anywhere; font: .875rem var(--mono); color: #666754; }
 .hidden-tag:hover { background: #dadfc3; border-style: solid; }
+.hidden-task-delete { width: 24px; height: 24px; padding: 0; border: 1px solid transparent; border-radius: 50%; color: #8b806d; font-size: 1.1rem; line-height: 1; }
+.hidden-task-delete:hover, .hidden-task-delete:focus-visible { border-color: #9b4d36; color: #9b4d36; background: #f2d5b9; transform: none; box-shadow: none; }
 [data-tooltip]::after {
   content: attr(data-tooltip);
   position: absolute;
