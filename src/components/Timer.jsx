@@ -1,60 +1,80 @@
 import { useState, useEffect, useRef } from 'react';
 
-
-export default function Timer({ onFinish, autoStart = false }) {
+export default function Timer({ onFinish, durationMinutes = 15, autoStart = false }) {
+    const totalTime = durationMinutes * 60 * 1000;
     const [isRunning, setIsRunning] = useState(autoStart);
-    const [elapsedTime, setElapsedTime] = useState(0);
-    const elapsedTimeRef = useRef(elapsedTime);
+    const [remainingTime, setRemainingTime] = useState(totalTime);
+    const remainingTimeRef = useRef(totalTime);
+    const onFinishRef = useRef(onFinish);
+
+    useEffect(() => {
+        onFinishRef.current = onFinish;
+    }, [onFinish]);
 
     useEffect(() => {
         if (!isRunning) return;
 
-        const startTime = Date.now() - elapsedTimeRef.current;
+        let lastTick = Date.now();
 
         const timeId = setInterval(() => {
-            const currentTime = Date.now() - startTime;
+            const now = Date.now();
+            const nextRemainingTime = Math.max(0, remainingTimeRef.current - (now - lastTick));
+            lastTick = now;
 
-            elapsedTimeRef.current = currentTime;
-            setElapsedTime(currentTime);
-    }, 10);
+            remainingTimeRef.current = nextRemainingTime;
+            setRemainingTime(nextRemainingTime);
 
-        return () => clearInterval(timeId)
-    },[isRunning]); 
+            if (nextRemainingTime === 0) {
+                setIsRunning(false);
+                onFinishRef.current(totalTime);
+            }
+        }, 100);
 
+        return () => clearInterval(timeId);
+    }, [isRunning, totalTime]);
 
     function formatTime() {
-
-        let minutes = Math.floor(elapsedTime / (1000 * 60) % 60);
-        let seconds = Math.floor(elapsedTime / (1000) % 60);
-        let milliseconds = Math.floor((elapsedTime % 1000) / 10);
-
-        minutes = String(minutes).padStart(2, "0");
-        seconds = String(seconds).padStart(2, "0");
-        milliseconds = String(milliseconds).padStart(2, "0");
-
-        return `${minutes}:${seconds}:${milliseconds}`
-
+        const totalSeconds = Math.ceil(remainingTime / 1000);
+        const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
+        const seconds = String(totalSeconds % 60).padStart(2, "0");
+        return `${minutes}:${seconds}`;
     }
 
+    const segmentCount = 15;
+    const litSegments = remainingTime === 0
+        ? 0
+        : Math.ceil((remainingTime / totalTime) * segmentCount);
+
     function handleFinish() {
-        if (elapsedTime === 0) return;
+        const elapsedTime = totalTime - remainingTimeRef.current;
+        if (elapsedTime <= 0) return;
 
         onFinish(elapsedTime);
-        setElapsedTime(0);
-        elapsedTimeRef.current = 0;
         setIsRunning(false);
     }
 
     return (
         <section className="timer">
-            <span className="eyebrow">Focus time</span>
-            <div className="timer-display">{formatTime()}</div>
+            <div className={`timer-frame ${remainingTime <= 60000 ? "low-time" : ""}`}>
+                <div className="timer-frame-top">
+                    <span className="hourglass-mark" aria-hidden="true" />
+                    <span className="eyebrow">Focus time</span>
+                    <span className="timer-total">of {durationMinutes}:00</span>
+                </div>
+                <div className="timer-display" aria-label={`${formatTime()} remaining`}>{formatTime()}</div>
+                <div className="timer-segments" aria-label={`${litSegments} of ${segmentCount} time segments remaining`} role="img">
+                    {Array.from({ length: segmentCount }, (_, index) => (
+                        <span className={`timer-segment ${index < litSegments ? "lit" : ""}`} key={index} />
+                    ))}
+                </div>
+            </div>
             <p className="timer-caption">Stay with the next small step.</p>
             <div className="timer-actions">
             <button className="menu-cursor" onClick={ () => setIsRunning(!isRunning)}>{isRunning ? "Pause" : "Start"}</button>
-            <button onClick={ () => {setElapsedTime(0); 
-                elapsedTimeRef.current = 0;
+            <button onClick={ () => {
                 setIsRunning(false);
+                remainingTimeRef.current = totalTime;
+                setRemainingTime(totalTime);
             }}>Reset</button>
             <button onClick={handleFinish}>Finish session</button>
             </div>

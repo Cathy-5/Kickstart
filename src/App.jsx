@@ -29,6 +29,7 @@ export default function App() {
   const [lastTaskId, setLastTaskId] = useState(() => localStorage.getItem("kickstart-last-task"));
   const [historyPage, setHistoryPage] = useState(0);
   const [taskPage, setTaskPage] = useState(0);
+  const [sessionDuration, setSessionDuration] = useState(15);
 
   const visibleTasks = tasks.filter((task) => !task.hidden);
   const hiddenTasks = tasks.filter((task) => task.hidden);
@@ -152,7 +153,8 @@ export default function App() {
             <div className="orbit-center">
               <StartConsole task={featuredTask} disabled={!featuredTask}
                 onStart={() => startTask(featuredTask)} onOpen={() => openTask(featuredTask)}
-                onHide={featuredTask ? () => toggleTaskVisibility(featuredTask.id) : undefined} />
+                onHide={featuredTask ? () => toggleTaskVisibility(featuredTask.id) : undefined}
+                durationMinutes={sessionDuration} onDurationChange={setSessionDuration} />
               <button className="text-button add-task-link" onClick={createTask}>+ Add task</button>
             </div>
           </div>
@@ -202,7 +204,9 @@ export default function App() {
           </GameScreen>
           <div className="setup-console">
             <StartConsole task={showTaskForm ? null : activeTask} disabled={showTaskForm}
-              onStart={() => startTask(activeTask)} />
+              onStart={() => startTask(activeTask)}
+              durationMinutes={showTaskForm ? undefined : sessionDuration}
+              onDurationChange={showTaskForm ? undefined : setSessionDuration} />
           </div>
         </section>
       )}
@@ -212,7 +216,7 @@ export default function App() {
           <GameScreen status="FOCUS">
             <h2 className="focus-task-title">{activeTask.title}</h2>
             <p className="focus-step">{activeTask.firstStep}</p>
-            <Timer autoStart onFinish={handleFinishSession} />
+            <Timer durationMinutes={sessionDuration} autoStart onFinish={handleFinishSession} />
           </GameScreen>
         </section>
       )}
