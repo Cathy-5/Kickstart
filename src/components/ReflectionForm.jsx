@@ -9,7 +9,7 @@ export default function ReflectionForm ({onSave}) {
     }
 
     return (
-        <form onSubmit={handleSubmit}>
+        <form className="reflection-form" onSubmit={handleSubmit}>
             <label> How did that feel? 
                 <input
                    value={reflection}

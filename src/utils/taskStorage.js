@@ -6,9 +6,10 @@ export function loadTasks() {
   try {
     const savedTasks = localStorage.getItem(STORAGE_KEY);
 
-    return savedTasks ? JSON.parse(savedTasks) : taskList;
+    const tasks = savedTasks ? JSON.parse(savedTasks) : taskList;
+    return tasks.filter((task) => task.title.toLowerCase() !== "go to bed");
   } catch {
-    return taskList;
+    return taskList.filter((task) => task.title.toLowerCase() !== "go to bed");
   }
 }
 

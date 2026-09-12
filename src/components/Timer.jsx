@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 
 
-export default function Timer({ onFinish }) {
-    const [isRunning, setIsRunning] = useState(false);
+export default function Timer({ onFinish, autoStart = false }) {
+    const [isRunning, setIsRunning] = useState(autoStart);
     const [elapsedTime, setElapsedTime] = useState(0);
     const elapsedTimeRef = useRef(elapsedTime);
 
@@ -46,15 +46,18 @@ export default function Timer({ onFinish }) {
     }
 
     return (
-        <section>
-            <div>{formatTime()}</div>
-            <button onClick={ () => setIsRunning(true)}>Start</button>
-            <button onClick={ () => setIsRunning(false)}>Pause</button>
+        <section className="timer">
+            <span className="eyebrow">Focus time</span>
+            <div className="timer-display">{formatTime()}</div>
+            <p className="timer-caption">Stay with the next small step.</p>
+            <div className="timer-actions">
+            <button className="menu-cursor" onClick={ () => setIsRunning(!isRunning)}>{isRunning ? "Pause" : "Start"}</button>
             <button onClick={ () => {setElapsedTime(0); 
                 elapsedTimeRef.current = 0;
                 setIsRunning(false);
             }}>Reset</button>
             <button onClick={handleFinish}>Finish session</button>
+            </div>
         </section>
     );
 }
