@@ -8,6 +8,7 @@ export default function StartConsole({ task, onStart, onOpen, onHide, durationMi
         className="start-button"
         type="button"
         disabled={disabled}
+        aria-label={disabled ? "Add a task first" : `Start ${task?.title || "this task"}`}
         data-tooltip={disabled ? "Add a task first" : `Start ${task?.title || "this task"}`}
         onClick={onStart}
         >

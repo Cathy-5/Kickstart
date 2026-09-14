@@ -2,10 +2,13 @@ import { useEffect, useState } from "react";
 import TaskForm from "./components/TaskForm";
 import TaskCartridge from "./components/TaskCartridge";
 import StartConsole from "./components/StartConsole";
+import MomentumRunner from "./components/MomentumRunner";
 import Timer from "./components/Timer";
 import ReflectionForm from "./components/ReflectionForm.jsx";
 import { loadTasks, saveTasks } from "./utils/taskStorage.js";
 import { loadSessions, saveSessions } from "./utils/sessionStorage.js";
+import { loadActiveSession, saveActiveSession, clearActiveSession } from "./utils/activeSessionStorage.js";
+import { formatFocusTime, getJourney } from "./utils/focusProgress.js";
 import "./App.css";
 
 function GameScreen({ status, children }) {
@@ -21,15 +24,19 @@ function GameScreen({ status, children }) {
 
 export default function App() {
   const [tasks, setTasks] = useState(loadTasks);
-  const [activeTask, setActiveTask] = useState(null);
-  const [sessionStarted, setSessionStarted] = useState(false);
+  const [focusSession, setFocusSession] = useState(() => loadActiveSession(loadSessions()));
+  const [activeTask, setActiveTask] = useState(focusSession?.task || null);
+  const [sessionStarted, setSessionStarted] = useState(Boolean(focusSession));
   const [isCreatingTask, setIsCreatingTask] = useState(false);
   const [sessions, setSessions] = useState(loadSessions);
   const [finishedSession, setFinishedSession] = useState(null);
   const [lastTaskId, setLastTaskId] = useState(() => localStorage.getItem("kickstart-last-task"));
   const [historyPage, setHistoryPage] = useState(0);
   const [taskPage, setTaskPage] = useState(0);
-  const [sessionDuration, setSessionDuration] = useState(15);
+  const [sessionDuration, setSessionDuration] = useState(focusSession ? focusSession.durationMs / 60000 : 15);
+  const [liveElapsedTime, setLiveElapsedTime] = useState(focusSession?.elapsedMs || 0);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [historySaveFailed, setHistorySaveFailed] = useState(false);
 
   const visibleTasks = tasks.filter((task) => !task.hidden);
   const hiddenTasks = tasks.filter((task) => task.hidden);
@@ -43,6 +50,8 @@ export default function App() {
   const hasNextHistoryPage = (historyPage + 1) * 5 < sessions.length;
   const showTaskForm = isCreatingTask || (tasks.length === 0 && !activeTask && !finishedSession);
   const showHome = !activeTask && !showTaskForm && !finishedSession;
+  const savedFocusSeconds = sessions.reduce((total, session) => total + session.elapsedTime / 1000, 0);
+  const runnerSeconds = savedFocusSeconds + (activeTask && sessionStarted ? liveElapsedTime / 1000 : 0);
 
   useEffect(() => { saveTasks(tasks); }, [tasks]);
   useEffect(() => { saveSessions(sessions); }, [sessions]);
@@ -68,15 +77,24 @@ export default function App() {
   }
 
   function startTask(task) {
+    const nextSession = {
+      id: crypto.randomUUID(), task, durationMs: sessionDuration * 60000,
+      elapsedMs: 0, isRunning: true,
+    };
+    setFocusSession(nextSession);
+    saveActiveSession(nextSession);
     selectTask(task);
     setActiveTask(task);
     setSessionStarted(true);
+    setLiveElapsedTime(0);
+    setIsTimerRunning(true);
   }
 
   function goHome() {
     setActiveTask(null);
     setSessionStarted(false);
     setIsCreatingTask(false);
+    setIsTimerRunning(false);
   }
 
   function createTask() {
@@ -91,14 +109,24 @@ export default function App() {
   }
 
   function handleFinishSession(elapsedTime) {
+    if (!focusSession) return;
     const session = {
-      id: crypto.randomUUID(), taskId: activeTask.id, taskTitle: activeTask.title,
+      id: focusSession.id, taskId: activeTask.id, taskTitle: activeTask.title,
       elapsedTime, completedAt: new Date().toISOString(),
     };
-    setSessions((currentSessions) => [...currentSessions, session]);
+    const nextSessions = sessions.some((saved) => saved.id === session.id) ? sessions : [...sessions, session];
+    // Commit history before clearing the checkpoint, so recovery cannot duplicate it.
+    const saved = saveSessions(nextSessions);
+    setHistorySaveFailed(!saved);
+    if (saved) clearActiveSession();
+    else saveActiveSession({ ...focusSession, elapsedMs: elapsedTime });
+    setSessions(nextSessions);
+    setFocusSession(null);
     setFinishedSession(session);
     setActiveTask(null);
     setSessionStarted(false);
+    setLiveElapsedTime(0);
+    setIsTimerRunning(false);
     setHistoryPage(0);
   }
 
@@ -106,10 +134,15 @@ export default function App() {
     setSessions((currentSessions) => currentSessions.map((session) => (
       session.id === finishedSession.id ? { ...session, reflection } : session
     )));
-    setTasks((currentTasks) => currentTasks.map((task) => (
-      task.id === finishedSession.taskId ? { ...task, completed: true } : task
-    )));
     setFinishedSession(null);
+  }
+
+  function toggleTaskCompleted(taskId) {
+    const completed = !tasks.find((task) => task.id === taskId)?.completed;
+    setTasks((currentTasks) => currentTasks.map((task) => (
+      task.id === taskId ? { ...task, completed } : task
+    )));
+    setActiveTask((task) => task?.id === taskId ? { ...task, completed } : task);
   }
 
   function handleDeleteSession(sessionId) {
@@ -140,6 +173,7 @@ export default function App() {
   return (
     <main className={`app ${showHome && sessions.length ? "with-history" : ""}`}>
       <header className="app-header"><h1>Kickstart<span aria-hidden="true">.</span></h1></header>
+      {historySaveFailed && <p className="storage-notice" role="alert">Your browser couldn&apos;t save this session. Keep this page open to retain it.</p>}
 
       {showHome && (
         <section className="home-orbit" aria-label="Choose a task cartridge">
@@ -158,6 +192,7 @@ export default function App() {
               <button className="text-button add-task-link" onClick={createTask}>+ Add task</button>
             </div>
           </div>
+          <MomentumRunner totalSeconds={runnerSeconds} className="home-runner" />
           <div className="cartridge-shelf">
             <div className="hidden-tags">
               {hiddenTasks.map((task) => (
@@ -185,7 +220,12 @@ export default function App() {
       {(showTaskForm || (activeTask && !sessionStarted)) && (
         <section className="setup-scene">
           <GameScreen status={showTaskForm ? "NEW" : "READY"}>
-            {tasks.length > 0 && <button className="screen-back" onClick={goHome}>&larr; Cartridges</button>}
+            {tasks.length > 0 && (
+              <button className="screen-back" type="button" onClick={goHome}>
+                <span className="screen-back-arrow" aria-hidden="true">&larr;</span>
+                Back to cartridges
+              </button>
+            )}
             <h2>{showTaskForm ? "New task" : "Ready to play?"}</h2>
             {showTaskForm ? <TaskForm onAddTask={handleAddTask} /> : (
               <>
@@ -198,6 +238,9 @@ export default function App() {
                   <p>{activeTask.firstStep}</p>
                 </div>
                 <button className="game-menu-button menu-cursor" onClick={createTask}>+ Add another task</button>
+                <button className="game-menu-button menu-cursor" onClick={() => toggleTaskCompleted(activeTask.id)}>
+                  {tasks.find((task) => task.id === activeTask.id)?.completed ? "Mark task as not completed" : "Mark task complete"}
+                </button>
               </>
             )}
             <div className="screen-footer">{showTaskForm ? "ONE SMALL STEP IS ENOUGH." : "YOUR PROGRESS IS SAVED LOCALLY."}</div>
@@ -213,10 +256,13 @@ export default function App() {
 
       {activeTask && sessionStarted && (
         <section className="focus-scene">
-          <GameScreen status="FOCUS">
+          <GameScreen status={isTimerRunning ? "FOCUS" : "PAUSED"}>
             <h2 className="focus-task-title">{activeTask.title}</h2>
             <p className="focus-step">{activeTask.firstStep}</p>
-            <Timer durationMinutes={sessionDuration} autoStart onFinish={handleFinishSession} />
+            <Timer key={focusSession.id} session={focusSession} onFinish={handleFinishSession}
+              onTick={setLiveElapsedTime} onRunningChange={setIsTimerRunning}>
+              <MomentumRunner totalSeconds={runnerSeconds} isRunning={isTimerRunning} />
+            </Timer>
           </GameScreen>
         </section>
       )}
@@ -224,9 +270,25 @@ export default function App() {
       {finishedSession && (
         <section className="reflection-scene">
           <GameScreen status="SAVED">
-            <h2>Session complete!</h2>
+            <h2>Session saved!</h2>
             <p className="session-summary">{finishedSession.taskTitle}</p>
-            <ReflectionForm onSave={saveReflection} />
+            <MomentumRunner totalSeconds={runnerSeconds} celebrate />
+            <p className="session-earned" role="status">
+              +{formatFocusTime(finishedSession.elapsedTime / 1000)} on your trail.
+              {getJourney(runnerSeconds).completed > getJourney(runnerSeconds - finishedSession.elapsedTime / 1000).completed
+                ? " Camp reached!" : " A little further than before."}
+            </p>
+            <div className="task-completion">
+              <label>
+                <input type="checkbox"
+                  checked={Boolean(tasks.find((task) => task.id === finishedSession.taskId)?.completed)}
+                  aria-describedby="task-completion-hint"
+                  onChange={() => toggleTaskCompleted(finishedSession.taskId)} />
+                <span>Mark task as completed</span>
+              </label>
+              <p id="task-completion-hint">Leave unchecked if you&apos;ll work on this task again.</p>
+            </div>
+            <ReflectionForm onSave={saveReflection} onSkip={() => setFinishedSession(null)} />
           </GameScreen>
         </section>
       )}
@@ -241,7 +303,7 @@ export default function App() {
             <li key={session.id}>
               <div className="session-line">
                 <strong>{session.taskTitle}</strong>
-                <span className="session-duration">{Math.round(session.elapsedTime / 1000)} sec</span>
+                <span className="session-duration">{formatFocusTime(session.elapsedTime / 1000)}</span>
                 <button className="delete-session" aria-label={`Delete session for ${session.taskTitle}`} onClick={() => handleDeleteSession(session.id)}>&times;</button>
               </div>
               {session.reflection && <p>{session.reflection}</p>}

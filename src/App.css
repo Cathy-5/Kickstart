@@ -7,7 +7,7 @@
   --light: #fff8e9;
   --yellow: #f5c132;
   --dark-yellow: #b47c1f;
-  --shell: #424842;
+  --shell: #464541;
   --screen: #dce1b5;
   --screen-ink: #2e3c29;
   --pixel: 'Press Start 2P', monospace;
@@ -59,6 +59,34 @@ button:focus-visible, [tabindex]:focus-visible {
   background: #fffaf02e;
   box-shadow: 5px 6px 0 #59503816;
 }
+/* A grounded, horizontal trail. The character's soles meet the top of the path. */
+.runner-trail { position: relative; width: 100%; margin: 24px auto; color: #4b6041; text-align: left; }
+.trail-caption { display: flex; justify-content: space-between; gap: 12px; align-items: center; font: .7rem var(--mono); }
+.trail-caption span:first-child { font: .55rem/1.6 var(--pixel); letter-spacing: .04em; }
+.trail-scene { position: relative; height: 112px; overflow: hidden; }
+.trail-hills { position: absolute; height: 37px; bottom: 25px; left: 20%; right: 11%; opacity: .18; background: #718457; clip-path: polygon(0 100%, 12% 100%, 12% 80%, 18% 80%, 18% 55%, 23% 55%, 23% 40%, 30% 40%, 30% 65%, 37% 65%, 37% 100%, 56% 100%, 56% 80%, 64% 80%, 64% 55%, 71% 55%, 71% 30%, 78% 30%, 78% 55%, 87% 55%, 87% 80%, 92% 80%, 92% 100%); }
+.trail-ground { position: absolute; bottom: 14px; left: 0; right: 0; height: 12px; border-top: 3px solid #718257; background: repeating-linear-gradient(90deg, #8e94655c 0 3px, transparent 3px 14px) 0 5px / 28px 3px repeat-x; }
+.trail-route { position: absolute; left: 28px; right: 64px; bottom: 26px; height: 70px; }
+.trail-earned { position: absolute; z-index: 1; left: 0; bottom: -3px; height: 3px; background: #ba8c37; }
+.trail-marker { position: absolute; bottom: -6px; width: 5px; height: 7px; background: #94a077; border: 1px solid #e3dfb1; }
+.trail-marker.passed { background: #ba8c37; }
+.runner-character { position: absolute; z-index: 3; bottom: 0; width: 63px; height: 70px; transform: translateX(-50%); }
+.runner-sprite { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+.runner-shadow { position: absolute; left: 7px; right: 7px; bottom: -3px; height: 5px; border-radius: 50%; background: #3e53322e; }
+.runner-frame-b { opacity: 0; }
+.runner-wave-arm { transform-origin: 25px 20px; animation: runner-wave .8s steps(3, end) 4; }
+@keyframes runner-wave { 0%, 100% { transform: rotate(-8deg); } 50% { transform: rotate(13deg); } }
+.is-running .runner-frame-a { animation: runner-step-a .44s steps(1, end) infinite; }
+.is-running .runner-frame-b { animation: runner-step-b .44s steps(1, end) infinite; }
+@keyframes runner-step-a { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+@keyframes runner-step-b { 0%, 49% { opacity: 0; } 50%, 100% { opacity: 1; } }
+.trail-camp { position: absolute; right: -55px; bottom: 0; width: 60px; height: 49px; }
+.runner-spark { position: absolute; left: -5px; top: 4px; color: #ac7d2a; font: 1rem var(--pixel); animation: runner-cheer .7s steps(2, end) 3; }
+@keyframes runner-cheer { 0%, 100% { transform: translateY(0); opacity: 1; } 50% { transform: translateY(-6px); opacity: .4; } }
+.home-runner { width: calc(100% - 84px); margin: 4px auto 8px; }
+.home-runner .trail-scene { height: 104px; }
+.runner-trail[data-tooltip]::after { bottom: 100%; max-width: min(300px, 95%); text-align: left; }
+.runner-trail:focus-visible { outline-offset: 7px; border-radius: 4px; }
 .orbit-stage {
   position: relative;
   width: min(100%, 900px);
@@ -163,7 +191,7 @@ button:focus-visible, [tabindex]:focus-visible {
   font: 1.375rem/1.15 var(--hand);
 }
 .cartridge-marker { position: absolute; bottom: 4px; right: 5px; font: .6rem var(--mono); }
-.cartridge-tone-1 { --label-color: #cdd5ad; }
+.cartridge-tone-1 { --label-color: #ddd0ba; }
 .cartridge-tone-2 { --label-color: #e9b498; }
 .cartridge-tone-3 { --label-color: #b7ccd0; }
 .cartridge-contacts {
@@ -186,7 +214,7 @@ button:focus-visible, [tabindex]:focus-visible {
   transform-origin: center bottom;
   animation: insert-cartridge .38s ease-out both;
 }
-.cartridge-inserted .cartridge { border-color: #3e6945; --label-color: #cad9a1; }
+.cartridge-inserted .cartridge { border-color: #3e6945; background: #405044; --label-color: #bcd59d; }
 .cartridge-inserted .cartridge-label { padding-left: 26px; padding-bottom: 13px; }
 .cartridge-inserted .cartridge-label::before {
   content: '';
@@ -239,7 +267,7 @@ button:focus-visible, [tabindex]:focus-visible {
 .hidden-tags { display: flex; flex-wrap: wrap; gap: 10px; }
 .hidden-task { display: flex; align-items: center; gap: 3px; }
 .hidden-tag { position: relative; padding: 7px 10px; border: 1px dashed #85826e; border-radius: 3px; max-width: 160px; overflow-wrap: anywhere; font: .875rem var(--mono); color: #666754; }
-.hidden-tag:hover { background: #dadfc3; border-style: solid; }
+.hidden-tag:hover { background: #ece1c8; border-style: solid; }
 .hidden-task-delete { width: 24px; height: 24px; padding: 0; border: 1px solid transparent; border-radius: 50%; color: #8b806d; font-size: 1.1rem; line-height: 1; }
 .hidden-task-delete:hover, .hidden-task-delete:focus-visible { border-color: #9b4d36; color: #9b4d36; background: #f2d5b9; transform: none; box-shadow: none; }
 [data-tooltip]::after {
@@ -303,8 +331,24 @@ button:focus-visible, [tabindex]:focus-visible {
 .screen-status { display: flex; justify-content: space-between; gap: 12px; padding-bottom: 16px; margin-bottom: 20px; border-bottom: 2px solid #52654155; font: .7rem/1.7 var(--pixel); text-transform: uppercase; }
 .screen-status span:last-child { display: flex; align-items: center; gap: 8px; }
 .screen-status span:last-child::before { content: ''; width: 6px; height: 6px; background: #4b6740; }
-.screen-back { display: block; padding: 0; margin-bottom: 23px; font-size: .85rem; }
-.screen-back:hover { text-decoration: underline; }
+.screen-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  max-width: 100%;
+  padding: 10px 14px;
+  margin-bottom: 25px;
+  border: 2px solid var(--screen-ink);
+  border-radius: 3px;
+  background: #f4edce;
+  box-shadow: 3px 3px 0 #53613e;
+  font: .85rem/1.5 var(--mono);
+  text-align: left;
+}
+.screen-back-arrow { font-size: 1.4rem; line-height: 1; }
+.screen-back:hover { background: #fff7d7; }
+.screen-back:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 #53613e; }
 .game-screen h2 { margin: 0 0 24px; font: 1.2rem/1.7 var(--pixel); overflow-wrap: anywhere; }
 .task-form { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
 .game-field { position: relative; padding: 11px 12px 12px 33px; border: 1px solid transparent; }
@@ -356,9 +400,9 @@ button:focus-visible, [tabindex]:focus-visible {
 .focus-scene .game-screen, .reflection-scene .game-screen { min-height: 0; padding: 30px; }
 .focus-task-title { text-align: center; }
 .focus-step, .session-summary { text-align: center; margin: 0 0 28px; overflow-wrap: anywhere; }
-.timer { text-align: center; padding: 8px 0 24px; }
+.timer { text-align: center; padding: 8px 0 6px; }
 .eyebrow { display: block; font-size: .8rem; text-transform: uppercase; margin-bottom: 17px; }
-.timer-frame { width: min(100%, 500px); padding: 18px 20px 17px; border: 3px solid #4b5c38; background: #cfd7a3; box-shadow: inset 0 0 0 3px #e6e9c04d, 4px 5px 0 #39452b2e; transition: border-color .4s, background .4s; }
+.timer-frame { width: min(100%, 500px); margin: auto; padding: 18px 20px 17px; border: 3px solid #4b5c38; background: #cfd7a3; box-shadow: inset 0 0 0 3px #e6e9c04d, 4px 5px 0 #39452b2e; transition: border-color .4s, background .4s; }
 .timer-frame.low-time { border-color: #886c36; background: #d8c982; }
 .timer-frame-top { display: grid; grid-template-columns: 22px 1fr auto; align-items: center; gap: 8px; padding-bottom: 11px; border-bottom: 1px solid #62734b80; }
 .timer-frame-top .eyebrow { margin: 0; text-align: left; font-size: .68rem; }
@@ -370,11 +414,22 @@ button:focus-visible, [tabindex]:focus-visible {
 .timer-segment { min-width: 0; height: 11px; background: #65705255; transition: background .35s, opacity .35s; }
 .timer-segment.lit { background: #b18c24; box-shadow: inset 0 2px #f2d675; }
 .timer-frame.low-time .timer-segment.lit { background: #a55c34; box-shadow: inset 0 2px #e8a878; }
-.timer-caption { font-size: .85rem; margin: 0 0 25px; }
+.timer-notice { font: .8rem/1.6 var(--mono); margin: 0 0 20px; }
+.storage-notice { grid-column: 1 / -1; text-align: center; font: .8rem/1.6 var(--mono); }
 .timer-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
 .timer-actions button { padding: 10px 14px; border: 1px solid #657347; }
 .timer-actions .menu-cursor { padding-left: 29px; }
 .timer-actions button:hover, .timer-actions button:focus-visible { background: #b7c28c; }
+.timer-actions button:disabled { opacity: .4; }
+.session-earned { text-align: center; font: .8rem/1.7 var(--mono); margin: -8px 0 22px; }
+.task-completion { margin: 0 0 26px; padding: 16px 0; border-block: 1px dashed #64724a66; }
+.task-completion label { display: flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; font: .85rem/1.6 var(--mono); }
+.task-completion input { flex-shrink: 0; width: 21px; height: 21px; margin: 0; accent-color: #466144; cursor: pointer; }
+.task-completion input:focus-visible { outline: 3px solid #466144; outline-offset: 4px; }
+.task-completion p { margin: 2px 0 0 31px; color: #52613e; font: .75rem/1.6 var(--mono); }
+.optional-label { margin-left: 8px; font-size: .7rem; color: #61734e; }
+.reflection-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.reflection-actions .text-button { border-color: transparent; font-size: .85rem; }
 .reflection-form { display: grid; gap: 20px; }
 .reflection-form label { font-size: 1rem; }
 .reflection-form input { display: block; width: 100%; margin-top: 12px; padding: 12px; border: 1px solid #637347; background: #f0f1d040; outline-offset: 3px; }
@@ -420,6 +475,11 @@ button:focus-visible, [tabindex]:focus-visible {
   .app-header { margin-bottom: 26px; }
   .app-header h1 { font-size: 2.5rem; }
   .home-orbit { border-radius: 20px; }
+  .home-runner { width: calc(100% - 36px); margin-top: 34px; }
+  .trail-caption { font-size: .65rem; }
+  .trail-route { left: 24px; right: 54px; }
+  .runner-character { width: 54px; height: 60px; }
+  .trail-camp { width: 49px; height: 40px; right: -45px; }
   .orbit-stage { min-height: 700px; }
   .orbit-center { top: 53%; }
   .orbit-task-0 { top: 4%; left: 5%; }
@@ -451,4 +511,6 @@ button:focus-visible, [tabindex]:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
   .orbit-task { transform: rotate(var(--tilt)); }
+  .runner-character .runner-frame-a { opacity: 1; }
+  .runner-character .runner-frame-b { opacity: 0; }
 }
