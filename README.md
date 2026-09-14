@@ -80,10 +80,3 @@ src/
   main.jsx           React entry point
 tests/               Timer and storage tests
 ```
-
-## Roadmap
-
-- Add gentle sound and vibration when a session ends.
-- Package the responsive app for iOS with Capacitor.
-- Add optional Homecoming rewards without distracting from the Start button.
-- Consider cloud sync and AI task breakdown after the core experience is stable.
