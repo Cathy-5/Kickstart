@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { elapsedAt, getJourney, formatFocusTime } from '../src/utils/focusProgress.js';
 import { loadActiveSession, saveActiveSession, clearActiveSession } from '../src/utils/activeSessionStorage.js';
 import { loadSessions, saveSessions } from '../src/utils/sessionStorage.js';
+import { getMilestone } from '../src/utils/milestones.js';
 
 const task = { id: 'swedish', title: 'Study Swedish', firstStep: 'Read one page' };
 const session = { id: 'session-1', task, durationMs: 300000, elapsedMs: 12340 };
@@ -53,6 +54,20 @@ test('focus labels use seconds for short sessions, then minutes and hours', () =
   assert.equal(formatFocusTime(12.9), '12s');
   assert.equal(formatFocusTime(900), '15m');
   assert.equal(formatFocusTime(3660), '1h 1m');
+});
+
+test('a completed session announces the selected focus length', () => {
+  const milestone = getMilestone(10, 910, 15);
+  assert.equal(milestone.kind, 'session');
+  assert.match(milestone.message, /15 minutes/);
+  assert.equal(milestone.audioSrc, '/audio/times-up.mp3');
+});
+
+test('crossing one focused hour announces the camp milestone', () => {
+  const milestone = getMilestone(3590, 3600, 5);
+  assert.equal(milestone.kind, 'hour');
+  assert.match(milestone.message, /one hour/);
+  assert.equal(milestone.audioSrc, '/audio/reach-one-hour.mp3');
 });
 
 test('refresh restores task, duration, and exact checkpoint in a paused state', () => {

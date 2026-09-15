@@ -29,7 +29,7 @@ export default function Timer({ session, onFinish, onTick, onRunningChange, chil
     setIsRunning(false);
     onRunningChange(false);
     publish(elapsedMs);
-    onFinish(elapsedMs);
+    onFinish(elapsedMs, elapsedMs >= totalTime);
   }
 
   const tick = useEffectEvent(() => {

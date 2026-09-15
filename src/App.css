@@ -452,6 +452,15 @@ button:focus-visible, [tabindex]:focus-visible {
 .page-nav button { min-width: 34px; min-height: 34px; font-size: 1.25rem; }
 .page-nav button:hover:not(:disabled) { background: #dfe1c5; }
 .page-nav button:disabled { opacity: .3; }
+.milestone-backdrop { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 24px; background: #25281caa; }
+.milestone-dialog { width: min(430px, 100%); padding: 30px 26px 26px; border: 3px solid var(--ink); background: var(--paper); box-shadow: 7px 8px 0 #25281c66; text-align: center; }
+.milestone-spark { display: block; color: #b18c24; font: 2rem/1 var(--pixel); }
+.milestone-dialog h2 { margin: 8px 0 14px; font: 1.3rem/1.5 var(--pixel); }
+.milestone-dialog p { margin: 0 auto 24px; font: 1rem/1.6 var(--mono); }
+.milestone-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
+.milestone-actions button { padding: 11px 15px; border: 1px solid var(--ink); font: .8rem/1.3 var(--mono); }
+.milestone-actions button:hover, .milestone-actions button:focus-visible { background: #b7c28c; }
+.milestone-actions .sound-button { color: #52613e; background: transparent; }
 @media (min-width: 1400px) {
   .orbit-stage { min-height: 650px; }
 }

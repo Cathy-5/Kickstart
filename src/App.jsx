@@ -5,10 +5,12 @@ import StartConsole from "./components/StartConsole";
 import MomentumRunner from "./components/MomentumRunner";
 import Timer from "./components/Timer";
 import ReflectionForm from "./components/ReflectionForm.jsx";
+import MilestoneDialog from "./components/MilestoneDialog.jsx";
 import { loadTasks, saveTasks } from "./utils/taskStorage.js";
 import { loadSessions, saveSessions } from "./utils/sessionStorage.js";
 import { loadActiveSession, saveActiveSession, clearActiveSession } from "./utils/activeSessionStorage.js";
 import { formatFocusTime, getJourney } from "./utils/focusProgress.js";
+import { getMilestone, primeMilestoneAudio } from "./utils/milestones.js";
 import "./App.css";
 
 function GameScreen({ status, children }) {
@@ -37,6 +39,7 @@ export default function App() {
   const [liveElapsedTime, setLiveElapsedTime] = useState(focusSession?.elapsedMs || 0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [historySaveFailed, setHistorySaveFailed] = useState(false);
+  const [milestone, setMilestone] = useState(null);
 
   const visibleTasks = tasks.filter((task) => !task.hidden);
   const hiddenTasks = tasks.filter((task) => task.hidden);
@@ -77,6 +80,7 @@ export default function App() {
   }
 
   function startTask(task) {
+    primeMilestoneAudio();
     const nextSession = {
       id: crypto.randomUUID(), task, durationMs: sessionDuration * 60000,
       elapsedMs: 0, isRunning: true,
@@ -108,8 +112,9 @@ export default function App() {
     )));
   }
 
-  function handleFinishSession(elapsedTime) {
+  function handleFinishSession(elapsedTime, completedNormally = false) {
     if (!focusSession) return;
+    const beforeSeconds = sessions.reduce((total, savedSession) => total + savedSession.elapsedTime / 1000, 0);
     const session = {
       id: focusSession.id, taskId: activeTask.id, taskTitle: activeTask.title,
       elapsedTime, completedAt: new Date().toISOString(),
@@ -128,6 +133,13 @@ export default function App() {
     setLiveElapsedTime(0);
     setIsTimerRunning(false);
     setHistoryPage(0);
+    if (completedNormally) {
+      setMilestone(getMilestone(
+        beforeSeconds,
+        beforeSeconds + elapsedTime / 1000,
+        Math.round(focusSession.durationMs / 60000),
+      ));
+    }
   }
 
   function saveReflection(reflection) {
@@ -316,6 +328,8 @@ export default function App() {
           </nav>}
         </aside>
       )}
+
+      {milestone && <MilestoneDialog milestone={milestone} onDismiss={() => setMilestone(null)} />}
     </main>
   );
 }
